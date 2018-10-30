@@ -5,6 +5,9 @@ An algorithm which uses tabu search to sort a random number of people who arrive
 
 ## Contributors
 sustac
+
 Sannity
+
 ripcord
+
 Ixw123
