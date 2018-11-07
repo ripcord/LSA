@@ -1,23 +1,17 @@
-# The Disgruntled Cinema Manager Algorithm
+# Local Stochastic Search Algorithms
 
 ## Description
-An algorithm which uses tabu search to sort a random number of people who arrive to a theater over a finite period of time into a fixed number of theaters of varying limited capacities.
+This repository contains a collection of problems or algorithms which either a) have been solved via a particular LSA (local search algorithm) such as [localized random search](http://www.cleveralgorithms.com/nature-inspired/stochastic/random_search.html), [adaptive random search](http://www.cleveralgorithms.com/nature-inspired/stochastic/adaptive_random_search.html), [hill climbing](http://www.cleveralgorithms.com/nature-inspired/stochastic/hill_climbing_search.html), [tabu search](http://www.cleveralgorithms.com/nature-inspired/stochastic/tabu_search.html), etc., or b) can be and have been applied to various optimization problems. 
 
-## Algorithm
-We have a cinema with a fixed number of theaters. For our implementation (written in Python), we have:
-  *5 Large (L = set of all large theaters)
-  *3 Medium (M = set of all medium theaters)
-  *2 Small (S = set of all small theaters)
-  
-We also have a fixed total theater capacity (total number of people which can occupy all theaters of a given theater set). This total capacity determines individual theater capacity, thus: c (individual theater capacity) = C (total theater capacity) / Ln (number of theaters in a given set of theaters, in this case set of large theaters).
+## Problems
+1. Disgruntled Cinema Manager
 
-In our implementation, moviegoers arrive to the cinema in groups (groups can also consist of a single individual). We randomly generate random groups 
+## Algorithms
+1. Trendsetter (TSR)
 
 ## Contributors
-sustac
 
-Sannity
-
-ripcord
-
-Ixw123
+*sustac
+*Sannity
+*ripcord
+*Ixw123
