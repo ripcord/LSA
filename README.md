@@ -11,7 +11,7 @@ This repository contains a collection of problems or algorithms which either a) 
 
 ## Contributors
 
-*sustac
-*Sannity
-*ripcord
-*Ixw123
+* sustac
+* Sannity
+* ripcord
+* Ixw123
