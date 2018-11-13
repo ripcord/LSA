@@ -5,6 +5,7 @@ import math
 import numpy as np
 import random
 import time
+import copy
 
 
 NUMBER_OF_POINTS = None
@@ -84,14 +85,17 @@ while True:
     
     #move in those specific random dimensions toward middle
     for i in dimensions_to_change:
-        #print(i, ":DATASET:", DATASET[i].T, "\nELITE_DATASET", ELITE_DATASET)
+        print(i, ":DATASET:", DATASET.T[i], "\nELITE_DATASET", ELITE_DATASET)
+        
         if(DATASET[i].T.all() == ELITE_DATASET.all()):
             #send the best data to THE SEARCH ALGORITHM!!!!
             my_little_step_size = .001
+            saved_data = copy.deepcopy(DATASET[i])
             for point, x in enumerate(DATASET[i]):
-                x[point] += random.uniform(0, my_little_step_size)
-
-            time.sleep(.0001)
+                DATASET[i][point] += random.uniform(0, my_little_step_size)
+            if(fitness(saved_data) > fitness(DATASET[i])):
+                DATASET[i] = copy.deepcopy(saved_data)
+            #print("FITTEST POINT: " ,DATASET[i], "| FITNESS: ", fitness(DATASET[i]))
         else:
             #make the rest of the points move toward the center
             for point, x in enumerate(DATASET[i]):
@@ -102,7 +106,7 @@ while True:
         #print("THE DATASET", DATASET)
     runs += 1    
     #break condition
-    if runs > 50:
+    if runs > 1500:
         break
 
 
