@@ -79,7 +79,7 @@ index = 0
 for LOW in KEYS:
     for point , i in enumerate(DATASET):
         for dim, x in enumerate(i):
-            DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
+            DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW] + 1)
     print("--*FULL DATASET BEFORE:\n",DATASET)
 
     runs = 0
