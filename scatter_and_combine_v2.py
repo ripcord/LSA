@@ -14,8 +14,10 @@ DIMENSIONAL_MIDPOINT = None
 ELITE_DATASET = None
 BOUNDS = (-8, 8)
 MAX_MOVEMENT_AMOUNT = 0.01 #FIXED FOR NOW
+BEST_MOVEMENT_AMOUNT = 0.00001 #FIXED FOR NOW
 
 #fitness function, elvis needs boats
+#Elvis = 0.41
 def fitness(data):
     temp = 0.0
     sin_temp = 0.0
@@ -75,7 +77,12 @@ while True:
     for point, x in enumerate(DATASET):
         #print(point, ":DATASET:", DATASET[point], "\nELITE_DATASET", ELITE_DATASET)
         if(DATASET[point].all() == ELITE_DATASET.all()):
+
+
             #run a search algorithm
+            
+
+
             #print("EQUAL")
             time.sleep(.00001)
         else:
