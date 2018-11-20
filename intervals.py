@@ -20,7 +20,7 @@ INTERVAl_MIN = 3                                                    #The minimum
 INTERVAl_MAX = (abs(BOUNDS[0]) + abs(BOUNDS[1])) // INTERVAl_MIN    #The maximum number of local search intervals
 LOCAL_ELITES = {}                                                   #Collection of local elite members (trendsetters)
 TABU = []                                                           #Tabu list for blacklisting local interval member distributions
-TABU_OFFSET = 1                                                     #Gap value which ensures a width between member distributions
+TABU_OFFSET = 0.0                                                   #Gap value which ensures a width between member distributions
 
 
 #Fitness function (Elvis needs Boats)
@@ -39,20 +39,18 @@ def fitness(data):
 #generated points within a local interval
 def tabu(follower):
     global TABU
+    global TABU_OFFSET
     if TABU:
         for i in TABU:
             '''print("i:",i)
             print("follower:",follower)
-            print("follower + i =", follower + i)
-            print("follower - i =", follower - i)
-            print("follower + TABU_OFFSET =", follower + TABU_OFFSET)
-            print("follower - TABU_OFFSET =", follower - TABU_OFFSET)'''
+            print("TABU_OFFSET:", TABU_OFFSET)
+            print("i + TABU_OFFSET =",i + TABU_OFFSET)
+            print("i - TABU_OFFSET =",i - TABU_OFFSET)'''
 
             if (follower == i):
                 return True
-            elif abs(follower + i) <= abs(follower + TABU_OFFSET):
-                return True
-            elif abs(follower - i) >= abs(follower - TABU_OFFSET):
+            elif (follower <= (i + TABU_OFFSET)) and (follower >= (i - TABU_OFFSET)):
                 return True
             else:
                 continue
@@ -70,6 +68,7 @@ if(len(sys.argv) == 3 ):
         exit()
     NUMBER_OF_DIMENSIONS = sys.argv[1]
     NUMBER_OF_POINTS = sys.argv[2]
+    TABU_OFFSET = ((abs(BOUNDS[0]) + abs(BOUNDS[1])) / NUMBER_OF_POINTS) / INTERVAl_MAX
 else:
     print("Invalid Arguments")
     exit()
@@ -79,7 +78,6 @@ else:
 
 
 #Generating search intervals
-random.seed()
 INTERVALS = range(BOUNDS[0], BOUNDS[1] + 1, random.choice(range(INTERVAl_MIN, INTERVAl_MAX + 1)))
 INTERVALS[-1] = BOUNDS[1]
 LOCAL_INTERVALS = {}
@@ -106,11 +104,16 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
         for dim, x in enumerate(i):
             DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
             while tabu(DATASET[point][dim]):
-                #DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
-                DATASET[point][dim] = random.triangular(LOW, LOCAL_INTERVALS[LOW], (((LOW + LOCAL_INTERVALS[LOW])/2)))
+                DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
+                print("Tabu!")
+                #print("TABU: {}" .format(TABU))
+                #DATASET[point][dim] = random.triangular(LOW, LOCAL_INTERVALS[LOW])
+                #DATASET[point][dim] = np.random.uniform(LOW, LOCAL_INTERVALS[LOW] + 1)
+                #DATASET[point][dim] = random.uniform(LOW, random.choice(range(LOW, LOCAL_INTERVALS[LOW] + 1)))
+                #print(LOW, LOCAL_INTERVALS[LOW], DATASET[point][dim])
 
     print("\n--*FULL DATASET BEFORE:\n\tLOCAL INTERVAL",ELITE_INDEX,": [",LOW,",",LOCAL_INTERVALS[LOW],"]\n",DATASET)
-    #print("--*TABU:\n",TABU)
+    print("--*TABU:\n{}" .format(TABU))
 
     runs = 0
     #Meat of the program, Merge/Fitness Function portion of the program
