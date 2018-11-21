@@ -20,7 +20,7 @@ INTERVAl_MIN = 3                                                    #The minimum
 INTERVAl_MAX = (abs(BOUNDS[0]) + abs(BOUNDS[1])) // INTERVAl_MIN    #The maximum number of local search intervals
 LOCAL_ELITES = {}                                                   #Collection of local elite members (trendsetters)
 TABU = []                                                           #Tabu list for blacklisting local interval member distributions
-TABU_OFFSET = 0.0                                                   #Gap value which ensures a width between member distributions
+TABU_OFFSET = 0.50                                                  #Gap value which ensures a width between member distributions
 
 
 #Fitness function (Elvis needs Boats)
@@ -104,16 +104,15 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
         for dim, x in enumerate(i):
             DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
             while tabu(DATASET[point][dim]):
-                DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
                 print("Tabu!")
+                DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
                 #print("TABU: {}" .format(TABU))
                 #DATASET[point][dim] = random.triangular(LOW, LOCAL_INTERVALS[LOW])
                 #DATASET[point][dim] = np.random.uniform(LOW, LOCAL_INTERVALS[LOW] + 1)
                 #DATASET[point][dim] = random.uniform(LOW, random.choice(range(LOW, LOCAL_INTERVALS[LOW] + 1)))
-                #print(LOW, LOCAL_INTERVALS[LOW], DATASET[point][dim])
 
     print("\n--*FULL DATASET BEFORE:\n\tLOCAL INTERVAL",ELITE_INDEX,": [",LOW,",",LOCAL_INTERVALS[LOW],"]\n",DATASET)
-    print("--*TABU:\n{}" .format(TABU))
+    print("--*TABU: {}" .format(TABU))
 
     runs = 0
     #Meat of the program, Merge/Fitness Function portion of the program
@@ -178,7 +177,8 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
     LOCAL_ELITES[ELITE_INDEX] = ELITE_DATASET
     ELITE_INDEX += 1
 
-for i in LOCAL_ELITES:
+#for i in LOCAL_ELITES:
+for i in LOCAL_ELITES.keys():
     if fitness(LOCAL_ELITES[i]) > fitness(ELITE_DATASET):
         ELITE_DATASET = copy.deepcopy(LOCAL_ELITES[i])
 
