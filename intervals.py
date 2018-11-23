@@ -121,7 +121,8 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
 
     #while runs < 100000:
     #while runs < 10000:
-    while runs < 1000:
+    #while runs < 1000:
+    while runs < 5000:
         #Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
         for i in DATASET:
