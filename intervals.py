@@ -81,13 +81,13 @@ else:
 INTERVALS = range(BOUNDS[0], BOUNDS[1] + 1, random.choice(range(INTERVAl_MIN, INTERVAl_MAX + 1)))
 INTERVALS[-1] = BOUNDS[1]
 LOCAL_INTERVALS = {}
-print("--*GLOBAL SEARCH INTERVAL:\n\t[", BOUNDS[0], ",", BOUNDS[1], "]")
-print("--*LOCAL SEARCH INTERVALS:")
+#print("--*GLOBAL SEARCH INTERVAL:\n\t[", BOUNDS[0], ",", BOUNDS[1], "]")
+#print("--*LOCAL SEARCH INTERVALS:")
 for i, value in enumerate(INTERVALS):
     if (i == (len(INTERVALS) - 1)):
         break
     else:
-        print("\tInterval:", i, "[", value, ",", INTERVALS[i+1], "]")
+        #print("\tInterval:", i, "[", value, ",", INTERVALS[i+1], "]")
         LOCAL_INTERVALS[value] = INTERVALS[i + 1]
 
 #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
@@ -104,15 +104,15 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
         for dim, x in enumerate(i):
             DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
             while tabu(DATASET[point][dim]):
-                print("Tabu!")
+                #print("Tabu!")
                 DATASET[point][dim] = random.uniform(LOW, LOCAL_INTERVALS[LOW])
                 #print("TABU: {}" .format(TABU))
                 #DATASET[point][dim] = random.triangular(LOW, LOCAL_INTERVALS[LOW])
                 #DATASET[point][dim] = np.random.uniform(LOW, LOCAL_INTERVALS[LOW] + 1)
                 #DATASET[point][dim] = random.uniform(LOW, random.choice(range(LOW, LOCAL_INTERVALS[LOW] + 1)))
 
-    print("\n--*FULL DATASET BEFORE:\n\tLOCAL INTERVAL",ELITE_INDEX,": [",LOW,",",LOCAL_INTERVALS[LOW],"]\n",DATASET)
-    print("--*TABU: {}" .format(TABU))
+    #print("\n--*FULL DATASET BEFORE:\n\tLOCAL INTERVAL",ELITE_INDEX,": [",LOW,",",LOCAL_INTERVALS[LOW],"]\n",DATASET)
+    #print("--*TABU: {}" .format(TABU))
 
     runs = 0
     #Meat of the program, Merge/Fitness Function portion of the program
@@ -122,7 +122,8 @@ for LOW in sorted(LOCAL_INTERVALS.keys()):
     #while runs < 100000:
     #while runs < 10000:
     #while runs < 1000:
-    while runs < 5000:
+    #while runs < 5000:
+    while runs < 1000000:
         #Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
         for i in DATASET:
@@ -183,8 +184,8 @@ for i in LOCAL_ELITES.keys():
     if fitness(LOCAL_ELITES[i]) > fitness(ELITE_DATASET):
         ELITE_DATASET = copy.deepcopy(LOCAL_ELITES[i])
 
-print("\n","*" * 80)
-print("--*FULL DATASET AFTER:\n", DATASET)
-print("\n--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
+#print("\n","*" * 80)
+#print("--*FULL DATASET AFTER:\n", DATASET)
+#print("\n--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
 print("\n--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
 
