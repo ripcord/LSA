@@ -7,6 +7,7 @@ import numpy as np
 import random
 import time
 import copy
+import timeit
 
 NUMBER_OF_POINTS = None         #Number of points
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -94,6 +95,7 @@ while evals < FITNESS_EVALS:
     ELITE_DATASET = DATASET[0]
 #        ELITE_PREVIOUS = copy.deepcopy(ELITE_DATASET)
 #        while True:
+    start_time = timeit.default_timer()
     while runs <= ITERS:
         ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
@@ -162,9 +164,10 @@ while evals < FITNESS_EVALS:
         #    print(runs, fitness(ELITE_DATASET))
 
         if (runs % 10) == 0:
-            if (fitness(ELITE_DATASET) - prev_fitness) < 0.00009:
+            if (fitness(ELITE_DATASET) - prev_fitness) < 0.000009:
                 #break
                 optimum_runs = runs
+                runtime = timeit.default_timer() - start_time
                 runs = ITERS + 1
 
     evals += 1
@@ -173,6 +176,7 @@ while evals < FITNESS_EVALS:
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
     #print("--*BEST DATA:", ELITE_DATASET, "{:>2}" .format(" "), "|","{:>2}" .format(" "),"FITNESS:", fitness(ELITE_DATASET))
     print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS + 20)//2), s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
+    print("\tApproximate Runtime: {0:.5f} sec".format(runtime))
     print("\tRuns:", optimum_runs)
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
     #print("{s1} {s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=30, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
