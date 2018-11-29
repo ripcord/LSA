@@ -60,7 +60,7 @@ def elvis_needs_boats(data):
     for i in range(0, NUMBER_OF_DIMENSIONS):
         temp += (data[i] + ((-1)**(i+1))*((i+1)%4))**2
         sin_temp += data[i]**(i+1)
-    fitness = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
+    fitness = -math.sqrt(temp) + math.sin(sin_temp)
     return fitness
 
 def fitness(data):
