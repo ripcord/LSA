@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import division
+from Plot_Graph import plot
 
 import sys
 import math
@@ -7,6 +8,34 @@ import numpy as np
 import random
 import time
 import copy
+
+ELVIS_NEEDS_BOATS = "ELVIS"
+SCHAFFER = "SCHAFFER"
+RASTRIGIN = "RASTRIGIN"
+EGGHOLDDER = "EGGHOLDER"
+
+
+def getFunction(name, dim, x, y):
+    function = []
+    if name == ELVIS_NEEDS_BOATS:
+        temp = 0.0
+        sin_temp = 0.0
+        fitness = 0.0
+        for i in range(0, dim):
+            temp += (x[i] + ((-1)**(i+1))*((i+1)%4))**2
+            sin_temp += x[i]**(i+1)
+        fitness = -math.sqrt(temp) + math.sin(sin_temp)
+        return fitness
+    elif name == SCHAFFER:
+        raise ValueError("Not implemented yet")
+    elif name == RASTRIGIN:
+        raise ValueError("Not implemented yet")
+    elif name == EGGHOLDDER:
+        raise ValueError("Not implemented yet")
+    else:
+        raise ValueError("Function not known")
+        
+
 
 NUMBER_OF_POINTS = None         #Number of points
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -22,6 +51,7 @@ FITNESS_EVALS = None            #Number of fitness evaluations (optional)
 
 #Fitness function "Elvis Needs Boats"
 #2D optimum = ~0.41
+
 def elvis_needs_boats(data):
     temp = 0.0
     sin_temp = 0.0
@@ -29,7 +59,7 @@ def elvis_needs_boats(data):
     for i in range(0, NUMBER_OF_DIMENSIONS):
         temp += (data[i] + ((-1)**(i+1))*((i+1)%4))**2
         sin_temp += data[i]**(i+1)
-    fitness = -math.sqrt(temp) + math.sin(sin_temp)
+    fitness = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
     return fitness
 
 def fitness(data):
@@ -68,6 +98,18 @@ else:
 #print(STEP_SIZE)
 #print(ELITE_STEP_SIZE)
 
+#PLOT = False
+PLOT = True
+
+functionName = ELVIS_NEEDS_BOATS
+
+if PLOT:
+    xLinespace = np.linspace(-8,8,100)
+    yLinespace = np.linspace(-8,8,100)
+    x = 8
+    y = 8
+    z = getFunction(functionName, NUMBER_OF_DIMENSIONS, xLinespace, yLinespace)
+    plot(z, NUMBER_OF_DIMENSIONS, x, y)
 
 if FITNESS_EVALS:
     evals = 0
