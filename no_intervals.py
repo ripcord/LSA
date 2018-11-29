@@ -12,9 +12,9 @@ NUMBER_OF_DIMENSIONS = None     #Number of dimensions
 DATASET = None                  #Set of all followers and their given positions
 DIMENSIONAL_MIDPOINT = None     #Set of all midpoints for each dimension
 ELITE_DATASET = None            #The best follower
-BOUNDS = (-8, 8)                #The global search interval
-MAX_MOVEMENT_AMOUNT = 0.01 #FIXED FOR NOW
-BEST_MOVEMENT_AMOUNT = 0.0001 #FIXED FOR NOW
+BOUNDS = (-8, 8)                #The glcobal search interval
+MAX_MOVEMENT_AMOUNT = None #FIXED FOR NOW
+BEST_MOVEMENT_AMOUNT = None
 
 #Fitness function (Elvis needs Boats)
 #Elvis optimum = 0.41 (2 dimensions)
@@ -43,6 +43,12 @@ else:
     print("Invalid Arguments")
     exit()
 
+#BEST_MOVEMENT_AMOUNT = .1/pow(8,NUMBER_OF_DIMENSIONS)
+#MAX_MOVEMENT_AMOUNT = 1/pow(8,NUMBER_OF_DIMENSIONS)
+BEST_MOVEMENT_AMOUNT= 1/math.log(NUMBER_OF_DIMENSIONS)
+MAX_MOVEMENT_AMOUNT = 1/math.log(NUMBER_OF_DIMENSIONS)
+#print(MAX_MOVEMENT_AMOUNT)
+print(BEST_MOVEMENT_AMOUNT)
 #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
 #Creating the "followers"
 DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
@@ -51,7 +57,7 @@ DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
 for point , i in enumerate(DATASET):
     for dim, x in enumerate(i):
         DATASET[point][dim] = random.uniform(BOUNDS[0], BOUNDS[1])
-print("--*FULL DATASET BEFORE:\n",DATASET)
+#print("--*FULL DATASET BEFORE:\n",DATASET)
 
 runs = 0
 #Meat of the program, Merge/Fitness Function portion of the program
@@ -65,6 +71,7 @@ while True:
     for i in DATASET:
         #print(i, fitness(i))
         if(fitness(i) > fitness(ELITE_DATASET)):
+            #print("Old Best:", fitness(ELITE_DATASET), "New Best:", fitness(i))
             ELITE_DATASET = copy.deepcopy(i[:])
 
     #Find the midpoint of all the points
@@ -90,46 +97,45 @@ while True:
 
             #Hill climbing for the "trendsetter" (elite follower)
             #for i in dimensions_to_change:
-            for i in range(NUMBER_OF_DIMENSIONS):
-                TEMP = copy.deepcopy(DATASET[point])
-                
-                DATASET[point][i] += BEST_MOVEMENT_AMOUNT
-                
-                if not (fitness(DATASET[point]) > fitness(TEMP)):
-                    for x in range(NUMBER_OF_DIMENSIONS):
-                        DATASET[point][x] = TEMP[x]
-                   
-                    DATASET[point][i] -= BEST_MOVEMENT_AMOUNT
+            for z in range(20):
+                for i in range(NUMBER_OF_DIMENSIONS):
+                    TEMP = copy.deepcopy(DATASET[point])
+                    
+                    DATASET[point][i] += random.uniform(0,BEST_MOVEMENT_AMOUNT)
                     
                     if not (fitness(DATASET[point]) > fitness(TEMP)):
                         for x in range(NUMBER_OF_DIMENSIONS):
                             DATASET[point][x] = TEMP[x]
-
+                    
+                        DATASET[point][i] -= random.uniform(0,BEST_MOVEMENT_AMOUNT)
+                        
+                        if not (fitness(DATASET[point]) > fitness(TEMP)):
+                            for x in range(NUMBER_OF_DIMENSIONS):
+                                DATASET[point][x] = TEMP[x]
+                        #if(fitness(DATASET[point]) > fitness(ELITE_DATASET)):
+                            #print("HILLCLIMBING => Old Best:", fitness(DATASET[point]), "New Best:", fitness(ELITE_DATASET)) 
                 ELITE_DATASET = copy.deepcopy(DATASET[point])
-
-
-            
-
+                    
 
             #print("EQUAL")
             #time.sleep(.00001)
         else:
             for i in dimensions_to_change:
                 if(x[i] < DIMENSIONAL_MIDPOINT[i]):
-                    #DATASET[point][i] += random.uniform(0, MAX_MOVEMENT_AMOUNT)
-                    DATASET[point][i] += MAX_MOVEMENT_AMOUNT
+                    DATASET[point][i] += random.uniform(0, MAX_MOVEMENT_AMOUNT)
+                    #DATASET[point][i] += MAX_MOVEMENT_AMOUNT
                 if(x[i] > DIMENSIONAL_MIDPOINT[i]):
-                    #DATASET[point][i] -= random.uniform(0, MAX_MOVEMENT_AMOUNT)
-                    DATASET[point][i] -= MAX_MOVEMENT_AMOUNT
+                    DATASET[point][i] -= random.uniform(0, MAX_MOVEMENT_AMOUNT)
+                    #DATASET[point][i] -= MAX_MOVEMENT_AMOUNT
         #print(DATASET)
 
     runs += 1    
     #break condition
 #    if runs > 10000:
-    if runs > 100000:
+    #print("FITNESS:", fitness(ELITE_DATASET))
+    if runs > 1000:
         break
 
-print("--*FULL DATASET AFTER:\n", DATASET)
-print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
+#print("--*FULL DATASET AFTER:\n", DATASET)
+#print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
 print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
-
