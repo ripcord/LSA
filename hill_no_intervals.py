@@ -1,6 +1,5 @@
 from __future__ import print_function
 from __future__ import division
-from Plot_Graph import plot
 
 import sys
 import math
@@ -9,34 +8,7 @@ import random
 import time
 import copy
 import timeit
-
-ELVIS_NEEDS_BOATS = "ELVIS"
-SCHAFFER = "SCHAFFER"
-RASTRIGIN = "RASTRIGIN"
-EGGHOLDDER = "EGGHOLDER"
-
-
-def getFunction(name, dim, x, y):
-    function = []
-    if name == ELVIS_NEEDS_BOATS:
-        temp = 0.0
-        sin_temp = 0.0
-        fitness = 0.0
-        for i in range(0, dim):
-            temp += (x[i] + ((-1)**(i+1))*((i+1)%4))**2
-            sin_temp += x[i]**(i+1)
-        fitness = -math.sqrt(temp) + math.sin(sin_temp)
-        return fitness
-    elif name == SCHAFFER:
-        raise ValueError("Not implemented yet")
-    elif name == RASTRIGIN:
-        raise ValueError("Not implemented yet")
-    elif name == EGGHOLDDER:
-        raise ValueError("Not implemented yet")
-    else:
-        raise ValueError("Function not known")
-        
-
+import os.path
 
 NUMBER_OF_POINTS = None         #Number of points
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -49,10 +21,10 @@ ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
 ELITE_CLIMBS = 20               #Number of times to hill climb for the elite point
 FITNESS_EVALS = None            #Number of fitness evaluations (optional)
+OUTPUT_FILE = None              #Handler for output file (optional)
 
 #Fitness function "Elvis Needs Boats"
 #2D optimum = ~0.41
-
 def elvis_needs_boats(data):
     temp = 0.0
     sin_temp = 0.0
@@ -60,7 +32,7 @@ def elvis_needs_boats(data):
     for i in range(0, NUMBER_OF_DIMENSIONS):
         temp += (data[i] + ((-1)**(i+1))*((i+1)%4))**2
         sin_temp += data[i]**(i+1)
-    fitness = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
+    fitness = -math.sqrt(temp) + math.sin(sin_temp)
     return fitness
 
 def fitness(data):
@@ -88,9 +60,26 @@ elif (len(sys.argv) == 4):
     NUMBER_OF_DIMENSIONS = sys.argv[1]
     NUMBER_OF_POINTS = sys.argv[2]
     FITNESS_EVALS = sys.argv[3]
+elif (len(sys.argv) == 5):
+    try:
+        sys.argv[1] = int(sys.argv[1])
+        sys.argv[2] = int(sys.argv[2])
+        sys.argv[3] = int(sys.argv[3])
+    except ValueError:
+        print("Invalid argument types")
+        exit()
+    NUMBER_OF_DIMENSIONS = sys.argv[1]
+    NUMBER_OF_POINTS = sys.argv[2]
+    FITNESS_EVALS = sys.argv[3]
+    OUTPUT_FILE_PATH = sys.argv[4]
+    if (not os.path.isfile(OUTPUT_FILE_PATH) or os.path.isdir(OUTPUT_FILE_PATH)):
+        print("File '", OUTPUT_FILE_PATH, "' does not exist or is a directory")
+        exit()
 else:
     print("Usage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS]\"")
     print("OR\nUsage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS] [NUMBER OF FITNESS EVALUATIONS]\"")
+    print("OR\nUsage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS] [NUMBER OF FITNESS EVALUATIONS] \
+                [PATH TO OUTPUT FILE]\"")
     exit()
 
 
@@ -99,24 +88,12 @@ else:
 #print(STEP_SIZE)
 #print(ELITE_STEP_SIZE)
 
-#PLOT = False
-PLOT = True
-
-functionName = ELVIS_NEEDS_BOATS
-
-if PLOT:
-    xLinespace = np.linspace(-8,8,100)
-    yLinespace = np.linspace(-8,8,100)
-
-    X, Y = np.meshgrid(xLinespace, yLinespace)
-
-    x = 8
-    y = 8
-    z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
-    plot(z, NUMBER_OF_DIMENSIONS, x, y)
 
 if not FITNESS_EVALS:
     FITNESS_EVALS = 1
+if OUTPUT_FILE_PATH:
+    OUTPUT_FILE = open(OUTPUT_FILE_PATH, "a+")
+
 
 evals = 0
 
@@ -135,7 +112,6 @@ while evals < FITNESS_EVALS:
 
     #Meat of the program, Merge/Fitness Function portion of the program
     runs = 1
-    optimum_runs = 0
 
     ELITE_DATASET = DATASET[0]
 #        ELITE_PREVIOUS = copy.deepcopy(ELITE_DATASET)
@@ -209,7 +185,7 @@ while evals < FITNESS_EVALS:
         #    print(runs, fitness(ELITE_DATASET))
 
         if (runs % 10) == 0:
-            if (fitness(ELITE_DATASET) - prev_fitness) < 0.000009:
+            if abs(fitness(ELITE_DATASET) - prev_fitness) < 0.0000009:
                 #break
                 optimum_runs = runs
                 runtime = timeit.default_timer() - start_time
@@ -220,9 +196,21 @@ while evals < FITNESS_EVALS:
     #print("--*FULL DATASET AFTER:\n", DATASET)
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
     #print("--*BEST DATA:", ELITE_DATASET, "{:>2}" .format(" "), "|","{:>2}" .format(" "),"FITNESS:", fitness(ELITE_DATASET))
-    print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS + 20)//2), s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
+    #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
+
+    if (OUTPUT_FILE):
+        OUTPUT_FILE.write("{s1:<{width}} {s2}\n".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=40, s2="| FITNESS: " + str(fitness(ELITE_DATASET))))
+        OUTPUT_FILE.write("\tApproximate Runtime: {0:.5f} sec\n".format(runtime))
+        OUTPUT_FILE.write("\tRuns: {}\n".format(optimum_runs))
+    #print("{s1}{s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS * 5)//2), s2=" | FITNESS: " + str(fitness(ELITE_DATASET)) ))
+    print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=40, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
     print("\tApproximate Runtime: {0:.5f} sec".format(runtime))
     print("\tRuns:", optimum_runs)
-    #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
-    #print("{s1} {s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=30, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
+
+if OUTPUT_FILE:
+    OUTPUT_FILE.close()
+
+
+
+
 
