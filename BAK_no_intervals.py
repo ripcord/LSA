@@ -48,7 +48,7 @@ else:
 BEST_MOVEMENT_AMOUNT= 1/math.log(NUMBER_OF_DIMENSIONS)
 MAX_MOVEMENT_AMOUNT = 1/math.log(NUMBER_OF_DIMENSIONS)
 #print(MAX_MOVEMENT_AMOUNT)
-#print(BEST_MOVEMENT_AMOUNT)
+print(BEST_MOVEMENT_AMOUNT)
 #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
 #Creating the "followers"
 DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
@@ -114,7 +114,7 @@ while True:
                                 DATASET[point][x] = TEMP[x]
                         #if(fitness(DATASET[point]) > fitness(ELITE_DATASET)):
                             #print("HILLCLIMBING => Old Best:", fitness(DATASET[point]), "New Best:", fitness(ELITE_DATASET)) 
-                    ELITE_DATASET = copy.deepcopy(DATASET[point]) #pivitol line
+                ELITE_DATASET = copy.deepcopy(DATASET[point])
                     
 
             #print("EQUAL")
