@@ -17,7 +17,7 @@ BOUNDS = (-8, 8)                #The global search interval
 STEP_SIZE = None                #Step size for all points
 ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
-ELITE_CLIMBS = 20               #Number of times to hill climb for the elite point
+ELITE_CLIMBS = 10               #Number of times to hill climb for the elite point
 FITNESS_EVALS = None            #Number of fitness evaluations (optional)
 
 #Fitness function "Elvis Needs Boats"
@@ -78,8 +78,8 @@ while evals < FITNESS_EVALS:
     #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
     #Creating the "followers"
     DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
-
-
+     
+    
     # for INDEX, VALUE in ITERABLE:
     for point , i in enumerate(DATASET):
         for dim, x in enumerate(i):
@@ -90,14 +90,21 @@ while evals < FITNESS_EVALS:
     #Meat of the program, Merge/Fitness Function portion of the program
     runs = 1
     optimum_runs = 0
+    amt_runs = 0
 
     ELITE_DATASET = DATASET[0]
+ 
+
 #        ELITE_PREVIOUS = copy.deepcopy(ELITE_DATASET)
 #        while True:
     while runs <= ITERS:
-        ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
-        STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
-
+        if(NUMBER_OF_DIMENSIONS != 1):
+            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        else:
+            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS+1)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS+1)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        
         #Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
         for i in DATASET:
@@ -105,8 +112,12 @@ while evals < FITNESS_EVALS:
             if fitness(i) > fitness(ELITE_DATASET):
                 #print("Old Best:", fitness(ELITE_DATASET), "New Best:", fitness(i))
                 ELITE_DATASET = copy.deepcopy(i[:])
-
         prev_fitness = fitness(ELITE_DATASET)
+        #PUT IN DESMOS
+        #-\frac{\arctan\left(13x\ \right)}{2}\ +\frac{1.5}{2}
+        #ELITE_STEP_SIZE = (-math.atan(NUMBER_OF_DIMENSIONS * fitness(ELITE_DATASET))/2.0) + (1.8/2)
+        #print("Positive Elite Step Size:", ELITE_STEP_SIZE)
+        #STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
         #Find the midpoint of all the points
         DIMENSIONAL_MIDPOINT = np.full((NUMBER_OF_DIMENSIONS, 1), None)
@@ -156,24 +167,32 @@ while evals < FITNESS_EVALS:
                         #DATASET[point][i] -= STEP_SIZE
             #print(DATASET)
 
+        
         runs += 1
 
         #if(prev_fitness < fitness(ELITE_DATASET)):
-        #    print(runs, fitness(ELITE_DATASET))
+            #print(runs, fitness(ELITE_DATASET), ELITE_STEP_SIZE)
 
-        if (runs % 10) == 0:
-            if (fitness(ELITE_DATASET) - prev_fitness) < 0.00009:
-                #break
+        if ((fitness(ELITE_DATASET) - prev_fitness) <= 0.0):
+            amt_runs += 1
+            if(amt_runs > 100):
                 optimum_runs = runs
                 runs = ITERS + 1
+                amt_runs = 0
+        #if (runs % 1) == 0:
+        #    print(fitness(ELITE_DATASET), prev_fitness, fitness(ELITE_DATASET) - prev_fitness)
+        #    if ((fitness(ELITE_DATASET) - prev_fitness) <= .0000001):
+                #break
+        #        optimum_runs = runs
+        #        runs = ITERS + 1
 
     evals += 1
 
     #print("--*FULL DATASET AFTER:\n", DATASET)
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
     #print("--*BEST DATA:", ELITE_DATASET, "{:>2}" .format(" "), "|","{:>2}" .format(" "),"FITNESS:", fitness(ELITE_DATASET))
-    print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS + 20)//2), s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
-    print("\tRuns:", optimum_runs)
+    #print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS + 20)//2), s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
+    print("\tRuns:", optimum_runs, "Actual Runs:", optimum_runs - 101, fitness(ELITE_DATASET))
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
     #print("{s1} {s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=30, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
 
