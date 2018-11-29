@@ -106,9 +106,12 @@ functionName = ELVIS_NEEDS_BOATS
 if PLOT:
     xLinespace = np.linspace(-8,8,100)
     yLinespace = np.linspace(-8,8,100)
+
+    X, Y = np.meshgrid(xLinespace, yLinespace)
+
     x = 8
     y = 8
-    z = getFunction(functionName, NUMBER_OF_DIMENSIONS, xLinespace, yLinespace)
+    z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
     plot(z, NUMBER_OF_DIMENSIONS, x, y)
 
 if FITNESS_EVALS:
