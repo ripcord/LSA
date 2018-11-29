@@ -89,6 +89,7 @@ while evals < FITNESS_EVALS:
 
     #Meat of the program, Merge/Fitness Function portion of the program
     runs = 1
+    optimum_runs = 0
 
     ELITE_DATASET = DATASET[0]
 #        ELITE_PREVIOUS = copy.deepcopy(ELITE_DATASET)
@@ -163,6 +164,7 @@ while evals < FITNESS_EVALS:
         if (runs % 10) == 0:
             if (fitness(ELITE_DATASET) - prev_fitness) < 0.00009:
                 #break
+                optimum_runs = runs
                 runs = ITERS + 1
 
     evals += 1
@@ -171,6 +173,7 @@ while evals < FITNESS_EVALS:
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
     #print("--*BEST DATA:", ELITE_DATASET, "{:>2}" .format(" "), "|","{:>2}" .format(" "),"FITNESS:", fitness(ELITE_DATASET))
     print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS + 20)//2), s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
+    print("\tRuns:", optimum_runs)
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
     #print("{s1} {s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=30, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
 
