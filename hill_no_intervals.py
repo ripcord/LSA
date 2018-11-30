@@ -44,6 +44,51 @@ def elvis_needs_boats(data):
 def fitness(data):
     return elvis_needs_boats(data)
 
+#Output to a file and/or STDOUT
+def output(evaluations, comp_runs, l_runtime, write_to_file=False, out_file=None):
+    global ELITE_DATASET
+    global ITERS
+    global STAGNANT_RUN_CAP
+    if write_to_file:
+        if out_file:
+            out_file.write("\n*-->Evaluation #{}:\n".format(evaluations))
+            out_file.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
+            out_file.write("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n".format("Maximum Iterations: ", ITERS,\
+                "Completed Iterations: ", completed_runs, "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ",\
+                completed_runs - STAGNANT_RUN_CAP))
+            out_file.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", runtime))
+            out_file.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
+    else:
+        print("{}".format("*-->Evaluation #" + str(evaluations)) + ":")
+        print("\t{}".format("Elite Point Coordinates: " + str(ELITE_DATASET)))
+        print("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}".format("Maximum Iterations: ", ITERS, "Completed Iterations: ", comp_runs,\
+            "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ", comp_runs - STAGNANT_RUN_CAP))
+        print("\n\t{:>24} {:.5f} sec\n".format("Approximate Runtime:", l_runtime))
+        print("\t{:>25}{} ***\n".format("*** FITNESS: ",fitness(ELITE_DATASET)))
+
+    return
+
+#Writes logging headers to an output file
+def file_prep():
+    global OUTPUT_FILE
+    global FITNESS_EVALS
+    global NUMBER_OF_DIMENSIONS
+    global NUMBER_OF_POINTS
+    t_num = 0
+    if os.path.exists(OUTPUT_FILE):
+        with open(OUTPUT_FILE, "r") as outf:
+            for line in reversed(list(outf)):
+                if re.search('Trial', line, re.I):
+                    t_num = re.search(r'\d+',line.rstrip()).group()
+                    break
+    OUTPUT_FILE = open(OUTPUT_FILE, "a+")
+    OUTPUT_FILE.write("\n\n<{}>\n{:^80}\nDate: {}".format("+" * 90, "<- Trial #" + str(int(t_num) + 1) + " ->",\
+        str(datetime.datetime.now().strftime("%Y-%m-%d"))))
+    OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M:%S")))
+    OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
+        NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
+    return
+
 #Get arguments from cmd, they go as follows {arg1: X points, arg2: N dimensions}
 #X points on N dimensions
 if (len(sys.argv) == 3 ):
@@ -99,22 +144,10 @@ if not FITNESS_EVALS:
 
 #Output file prep
 if OUTPUT_FILE:
-    t_num = 0
-    if os.path.exists(OUTPUT_FILE):
-        with open(OUTPUT_FILE, "r") as outf:
-            for line in reversed(list(outf)):
-                if re.search('Trial', line, re.I):
-                    t_num = re.search(r'\d+',line.rstrip()).group()
-                    break
-    OUTPUT_FILE = open(OUTPUT_FILE, "a+")
-    OUTPUT_FILE.write("\n\n<{}>\n{:^80}\nDate: {}".format("+" * 90, "<- Trial #" + str(int(t_num) + 1) + " ->",\
-        str(datetime.datetime.now().strftime("%Y-%m-%d"))))
-    OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M:%S")))
-    OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
-        NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
+    file_prep()
 
 
-print("\n{}{}\n{:>21}{}\n{:>21}{}\n".format("Fitness Evaluations: ", FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
+print("\nFitness Evaluations: {}\n{:>21}{}\n{:>21}{}\n".format(FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
     "Points: ", NUMBER_OF_POINTS))
 
 evals = 0
@@ -248,21 +281,9 @@ while evals < FITNESS_EVALS:
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
  
     if OUTPUT_FILE:
-        OUTPUT_FILE.write("\n*-->Evaluation #{}:\n".format(evals))
-        OUTPUT_FILE.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
-        OUTPUT_FILE.write("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n".format("Maximum Iterations: ", ITERS,\
-            "Completed Iterations: ", completed_runs, "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ",\
-            completed_runs - STAGNANT_RUN_CAP))
-        OUTPUT_FILE.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", runtime))
-        OUTPUT_FILE.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
+        output(evals, completed_runs, runtime, True, OUTPUT_FILE)
 
-
-    print("{}".format("*-->Evaluation #" + str(evals)) + ":")
-    print("\t{}".format("Elite Point Coordinates: " + str(ELITE_DATASET)))
-    print("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}".format("Maximum Iterations: ", ITERS, "Completed Iterations: ", completed_runs,\
-        "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ", completed_runs - STAGNANT_RUN_CAP))
-    print("\n\t{:>24} {:.5f} sec\n".format("Approximate Runtime:", runtime))
-    print("\t{:>25}{} ***\n".format("*** FITNESS: ",fitness(ELITE_DATASET)))
+    output(evals, completed_runs, runtime)
     #print("\tRuns:", optimum_runs)
     
 
