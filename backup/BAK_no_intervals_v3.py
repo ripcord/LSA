@@ -100,7 +100,7 @@ def file_prep():
     OUTPUT_FILE = open(OUTPUT_FILE, "a+")
     OUTPUT_FILE.write("\n\n<{}>\n{:^80}\nDate: {}".format("+" * 90, "<- Trial #" + str(int(t_num) + 1) + " ->",\
         str(datetime.datetime.now().strftime("%Y-%m-%d"))))
-    OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M:%S")))
+    OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M.%S")))
     OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
         NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
     return
