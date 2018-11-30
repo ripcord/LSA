@@ -314,7 +314,7 @@ while evals < FITNESS_EVALS:
     evals += 1
 
     #This needs to be after "evals += 1" !!!
-    RESULTS[evals] = [fitness(ELITE_DATASET), ELITE_DATASET, completed_runs - STAGNANT_RUN_CAP]
+    RESULTS[evals] = (fitness(ELITE_DATASET), ELITE_DATASET, completed_runs - STAGNANT_RUN_CAP)
 
     #print("--*FULL DATASET AFTER:\n", DATASET)
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
