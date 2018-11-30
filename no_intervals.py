@@ -21,7 +21,7 @@ DATASET = None                  #Set of all points and their given positions
 DIMENSIONAL_MIDPOINT = None     #Set of all midpoints for each dimension
 ELITE_DATASET = None            #The elite point, AKA the point with the best fitness
 BOUNDS = (-8, 8)                #The global search interval
-STEP_SIZE = None                #Step size for all points
+STEP_SIZE = None                #Step size for all non-elite points
 ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
 ELITE_CLIMBS = 10               #Number of times to hill climb for the elite point
@@ -108,7 +108,6 @@ def file_prep():
 #Writes the best fitness to STDOUT and/or an output file
 def print_best(data, out_file=None):
     i = 1
-    temp = None
     temp = data[1][0]
     for k in sorted(data.keys()):
         if data[k][0] > temp:
