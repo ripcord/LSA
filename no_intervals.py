@@ -144,7 +144,7 @@ elif (len(sys.argv) == 5):
     FITNESS_EVALS = sys.argv[3]
     OUTPUT_FILE = sys.argv[4]
     if os.path.isdir(OUTPUT_FILE):
-        print("File '", OUTPUT_FILE, "' is a directory")
+        print("File '", os.path.abspath(OUTPUT_FILE), "' is a directory")
         exit()
 else:
     print("Usage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS]\"")
