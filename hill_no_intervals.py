@@ -62,19 +62,18 @@ def get_step(runs, elite=False, nd_offset=None):
             return ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
 #Output to a file and/or STDOUT
-def output(evaluations, comp_runs, l_runtime, write_to_file=False, out_file=None):
+def output(evaluations, comp_runs, l_runtime, out_file=None):
     global ELITE_DATASET
     global ITERS
     global STAGNANT_RUN_CAP
-    if write_to_file:
-        if out_file:
-            out_file.write("\n*-->Evaluation #{}:\n".format(evaluations))
-            out_file.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
-            out_file.write("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n".format("Maximum Iterations: ", ITERS,\
-                "Completed Iterations: ", completed_runs, "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ",\
-                completed_runs - STAGNANT_RUN_CAP))
-            out_file.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", runtime))
-            out_file.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
+    if out_file:
+        out_file.write("\n*-->Evaluation #{}:\n".format(evaluations))
+        out_file.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
+        out_file.write("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n".format("Maximum Iterations: ", ITERS,\
+            "Completed Iterations: ", completed_runs, "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ",\
+            completed_runs - STAGNANT_RUN_CAP))
+        out_file.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", runtime))
+        out_file.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
     else:
         print("{}".format("*-->Evaluation #" + str(evaluations)) + ":")
         print("\t{}".format("Elite Point Coordinates: " + str(ELITE_DATASET)))
@@ -107,7 +106,7 @@ def file_prep():
     return
 
 #Writes the best fitness to STDOUT and/or an output file
-def print_best(data, write_to_file=False, out_file=None):
+def print_best(data, out_file=None):
     i = 1
     temp = None
     temp = data[1][0]
@@ -118,11 +117,10 @@ def print_best(data, write_to_file=False, out_file=None):
     print("\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
     print("{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:", i, data[i][2],\
             data[i][1], "Fitness:", temp))
-    if write_to_file:
-        if out_file:
-            out_file.write("\n\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
-            out_file.write("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
-                i, data[i][2], data[i][1], "Fitness:", temp))
+    if out_file:
+        out_file.write("\n\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
+        out_file.write("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
+            i, data[i][2], data[i][1], "Fitness:", temp))
     return
 
 #Get arguments from cmd, they go as follows {arg1: X points, arg2: N dimensions}
@@ -324,13 +322,13 @@ while evals < FITNESS_EVALS:
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
  
     if OUTPUT_FILE:
-        output(evals, completed_runs, runtime, True, OUTPUT_FILE)
+        output(evals, completed_runs, runtime, OUTPUT_FILE)
 
     output(evals, completed_runs, runtime)
     #print("\tRuns:", optimum_runs)
 
 if OUTPUT_FILE:
-    print_best(RESULTS, True, OUTPUT_FILE)
+    print_best(RESULTS, OUTPUT_FILE)
 else:
     print_best(RESULTS)
 
