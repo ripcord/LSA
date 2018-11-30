@@ -9,6 +9,11 @@ import time
 import copy
 import timeit
 import os.path
+import datetime
+import re
+
+#Time for total program execution (approx.)
+COMP_TIME = timeit.default_timer()
 
 NUMBER_OF_POINTS = None         #Number of points
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -19,7 +24,8 @@ BOUNDS = (-8, 8)                #The global search interval
 STEP_SIZE = None                #Step size for all points
 ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
-ELITE_CLIMBS = 20               #Number of times to hill climb for the elite point
+ELITE_CLIMBS = 10               #Number of times to hill climb for the elite point
+STAGNANT_RUN_CAP = 100          #Maximum number of allowable runs for which the fitness value does not improve
 FITNESS_EVALS = None            #Number of fitness evaluations (optional)
 OUTPUT_FILE = None              #Handler for output file (optional)
 
@@ -51,12 +57,12 @@ if (len(sys.argv) == 3 ):
     NUMBER_OF_POINTS = sys.argv[2]
 elif (len(sys.argv) == 4):
     try:
-    	sys.argv[1] = int(sys.argv[1])
-    	sys.argv[2] = int(sys.argv[2])
-    	sys.argv[3] = int(sys.argv[3])
+        sys.argv[1] = int(sys.argv[1])
+        sys.argv[2] = int(sys.argv[2])
+        sys.argv[3] = int(sys.argv[3])
     except ValueError:
-    	print("Arguments must be of type integer")
-    	exit()
+        print("Arguments must be of type integer")
+        exit()
     NUMBER_OF_DIMENSIONS = sys.argv[1]
     NUMBER_OF_POINTS = sys.argv[2]
     FITNESS_EVALS = sys.argv[3]
@@ -71,15 +77,14 @@ elif (len(sys.argv) == 5):
     NUMBER_OF_DIMENSIONS = sys.argv[1]
     NUMBER_OF_POINTS = sys.argv[2]
     FITNESS_EVALS = sys.argv[3]
-    OUTPUT_FILE_PATH = sys.argv[4]
-    if (not os.path.isfile(OUTPUT_FILE_PATH) or os.path.isdir(OUTPUT_FILE_PATH)):
-        print("File '", OUTPUT_FILE_PATH, "' does not exist or is a directory")
+    OUTPUT_FILE = sys.argv[4]
+    if os.path.isdir(OUTPUT_FILE):
+        print("File '", OUTPUT_FILE, "' is a directory")
         exit()
 else:
     print("Usage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS]\"")
     print("OR\nUsage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS] [NUMBER OF FITNESS EVALUATIONS]\"")
-    print("OR\nUsage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS] [NUMBER OF FITNESS EVALUATIONS] \
-                [PATH TO OUTPUT FILE]\"")
+    print("OR\nUsage: \"python", sys.argv[0], "[NUMBER OF DIMENSIONS] [NUMBER OF POINTS] [NUMBER OF FITNESS EVALUATIONS] [PATH TO OUTPUT FILE]\"")
     exit()
 
 
@@ -91,9 +96,26 @@ else:
 
 if not FITNESS_EVALS:
     FITNESS_EVALS = 1
-if OUTPUT_FILE_PATH:
-    OUTPUT_FILE = open(OUTPUT_FILE_PATH, "a+")
 
+#Output file prep
+if OUTPUT_FILE:
+    t_num = 0
+    if os.path.exists(OUTPUT_FILE):
+        with open(OUTPUT_FILE, "r") as outf:
+            for line in reversed(list(outf)):
+                if re.search('Trial', line, re.I):
+                    t_num = re.search(r'\d+',line.rstrip()).group()
+                    break
+    OUTPUT_FILE = open(OUTPUT_FILE, "a+")
+    OUTPUT_FILE.write("\n\n<{}>\n{:^80}\nDate: {}".format("+" * 90, "<- Trial #" + str(int(t_num) + 1) + " ->",\
+        str(datetime.datetime.now().strftime("%Y-%m-%d"))))
+    OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M:%S")))
+    OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
+        NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
+
+
+print("\n{}{}\n{:>21}{}\n{:>21}{}\n".format("Fitness Evaluations: ", FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
+    "Points: ", NUMBER_OF_POINTS))
 
 evals = 0
 
@@ -101,8 +123,8 @@ while evals < FITNESS_EVALS:
     #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
     #Creating the "followers"
     DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
-
-
+     
+    
     # for INDEX, VALUE in ITERABLE:
     for point , i in enumerate(DATASET):
         for dim, x in enumerate(i):
@@ -112,15 +134,24 @@ while evals < FITNESS_EVALS:
 
     #Meat of the program, Merge/Fitness Function portion of the program
     runs = 1
+    completed_runs = 0
+    stagnant_runs = 0
 
+   
     ELITE_DATASET = DATASET[0]
-#        ELITE_PREVIOUS = copy.deepcopy(ELITE_DATASET)
-#        while True:
-    start_time = timeit.default_timer()
-    while runs <= ITERS:
-        ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
-        STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
+
+    start_time = timeit.default_timer()
+
+#   while True:    
+    while runs <= ITERS:
+        if (NUMBER_OF_DIMENSIONS != 1):
+            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        else:
+            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS+1)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS+1)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        
         #Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
         for i in DATASET:
@@ -130,6 +161,12 @@ while evals < FITNESS_EVALS:
                 ELITE_DATASET = copy.deepcopy(i[:])
 
         prev_fitness = fitness(ELITE_DATASET)
+
+        #PUT IN DESMOS
+        #-\frac{\arctan\left(13x\ \right)}{2}\ +\frac{1.5}{2}
+        #ELITE_STEP_SIZE = (-math.atan(NUMBER_OF_DIMENSIONS * fitness(ELITE_DATASET))/2.0) + (1.8/2)
+        #print("Positive Elite Step Size:", ELITE_STEP_SIZE)
+        #STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
         #Find the midpoint of all the points
         DIMENSIONAL_MIDPOINT = np.full((NUMBER_OF_DIMENSIONS, 1), None)
@@ -145,6 +182,8 @@ while evals < FITNESS_EVALS:
         #move in those specific random dimensions toward middle
         for point, x in enumerate(DATASET):
             #print(point, ":DATASET:", DATASET[point], "\nELITE_DATASET", ELITE_DATASET)
+
+            #Elite Point!
             if fitness(DATASET[point]) >= fitness(ELITE_DATASET):
                 
                 ELITE_DATASET = copy.deepcopy(DATASET[point])
@@ -167,8 +206,11 @@ while evals < FITNESS_EVALS:
                                     DATASET[point][x] = TEMP[x]
                             #if(fitness(DATASET[point]) > fitness(ELITE_DATASET)):
                                 #print("HILLCLIMBING => Old Best:", fitness(DATASET[point]), "New Best:", fitness(ELITE_DATASET)) 
-                        ELITE_DATASET = copy.deepcopy(DATASET[point]) #CRITICAL LINE!
+                        
+                        #CRITICAL LINE!
+                        ELITE_DATASET = copy.deepcopy(DATASET[point])
 
+            #Non-elite Points
             else:
                 for i in dimensions_to_change:
                     if(x[i] < DIMENSIONAL_MIDPOINT[i]):
@@ -179,36 +221,61 @@ while evals < FITNESS_EVALS:
                         #DATASET[point][i] -= STEP_SIZE
             #print(DATASET)
 
+        
         runs += 1
 
         #if(prev_fitness < fitness(ELITE_DATASET)):
-        #    print(runs, fitness(ELITE_DATASET))
+            #print(runs, fitness(ELITE_DATASET), ELITE_STEP_SIZE)
 
-        if (runs % 10) == 0:
-            if abs(fitness(ELITE_DATASET) - prev_fitness) < 0.0000009:
-                #break
-                optimum_runs = runs
+        if ((fitness(ELITE_DATASET) - prev_fitness) <= 0.0):
+            stagnant_runs += 1
+            if stagnant_runs == STAGNANT_RUN_CAP:
+                completed_runs = runs
+                stagnant_runs = 0
                 runtime = timeit.default_timer() - start_time
                 runs = ITERS + 1
+
+        #if (runs % 10) == 0:
+        #    print(fitness(ELITE_DATASET), prev_fitness, fitness(ELITE_DATASET) - prev_fitness)
+        #    if ((fitness(ELITE_DATASET) - prev_fitness) <= .0000001):
+        #        optimum_runs = runs
+        #        runs = ITERS + 1
 
     evals += 1
 
     #print("--*FULL DATASET AFTER:\n", DATASET)
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
-    #print("--*BEST DATA:", ELITE_DATASET, "{:>2}" .format(" "), "|","{:>2}" .format(" "),"FITNESS:", fitness(ELITE_DATASET))
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
+ 
+    if OUTPUT_FILE:
+        OUTPUT_FILE.write("\n*-->Evaluation #{}:\n".format(evals))
+        OUTPUT_FILE.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
+        OUTPUT_FILE.write("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n".format("Maximum Iterations: ", ITERS,\
+            "Completed Iterations: ", completed_runs, "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ",\
+            completed_runs - STAGNANT_RUN_CAP))
+        OUTPUT_FILE.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", runtime))
+        OUTPUT_FILE.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
 
-    if (OUTPUT_FILE):
-        OUTPUT_FILE.write("{s1:<{width}} {s2}\n".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=40, s2="| FITNESS: " + str(fitness(ELITE_DATASET))))
-        OUTPUT_FILE.write("\tApproximate Runtime: {0:.5f} sec\n".format(runtime))
-        OUTPUT_FILE.write("\tRuns: {}\n".format(optimum_runs))
-    #print("{s1}{s2:>{width}}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=10 * ((NUMBER_OF_DIMENSIONS * 5)//2), s2=" | FITNESS: " + str(fitness(ELITE_DATASET)) ))
-    print("{s1:<{width}} {s2}".format(s1="--*BEST DATA: " + str(ELITE_DATASET), width=40, s2="| FITNESS: " + str(fitness(ELITE_DATASET)) ))
-    print("\tApproximate Runtime: {0:.5f} sec".format(runtime))
-    print("\tRuns:", optimum_runs)
+
+    print("{}".format("*-->Evaluation #" + str(evals)) + ":")
+    print("\t{}".format("Elite Point Coordinates: " + str(ELITE_DATASET)))
+    print("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}".format("Maximum Iterations: ", ITERS, "Completed Iterations: ", completed_runs,\
+        "Stagnant Iterations: ", STAGNANT_RUN_CAP, "Actual Iterations: ", completed_runs - STAGNANT_RUN_CAP))
+    print("\n\t{:>24} {:.5f} sec\n".format("Approximate Runtime:", runtime))
+    print("\t{:>25}{} ***\n".format("*** FITNESS: ",fitness(ELITE_DATASET)))
+    #print("\tRuns:", optimum_runs)
+    
+
+t_runtime = timeit.default_timer() - COMP_TIME
+
+print("\nTotal Approximate Runtime: {:.5f} sec\n".format(t_runtime))
 
 if OUTPUT_FILE:
+    OUTPUT_FILE.write("\n\nTotal Approximate Runtime: {:.5f} sec\n\n".format(t_runtime))
     OUTPUT_FILE.close()
+
+
+
 
 
 
