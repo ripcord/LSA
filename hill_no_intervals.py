@@ -99,11 +99,13 @@ def print_best(data, write_to_file=False, out_file=None):
         if data[k][0] > temp:
             temp = data[k][0]
             i = k
-    print("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:", i, data[i][2],\
+    print("\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
+    print("{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:", i, data[i][2],\
             data[i][1], "Fitness:", temp))
     if write_to_file:
         if out_file:
-            out_file.write("\n\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
+            out_file.write("\n\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
+            out_file.write("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
                 i, data[i][2], data[i][1], "Fitness:", temp))
     return
 
