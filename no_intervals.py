@@ -45,6 +45,22 @@ def elvis_needs_boats(data):
 def fitness(data):
     return elvis_needs_boats(data)
 
+#Returns a step size, variable for elite and non-elite points
+def get_step(runs, elite=False, nd_offset=None):
+    global NUMBER_OF_DIMENSIONS
+    global NUMBER_OF_POINTS
+    global BOUNDS
+    if elite:
+        if nd_offset:
+            return ((0.8/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        else:
+            return ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+    else:
+        if nd_offset:
+            return ((1.0/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        else:
+            return ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+
 #Output to a file and/or STDOUT
 def output(evaluations, comp_runs, l_runtime, write_to_file=False, out_file=None):
     global ELITE_DATASET
@@ -199,11 +215,15 @@ while evals < FITNESS_EVALS:
 #   while True:    
     while runs <= ITERS:
         if (NUMBER_OF_DIMENSIONS != 1):
-            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
-            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            #ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            #STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            ELITE_STEP_SIZE = get_step(runs, True)
+            STEP_SIZE = get_step(runs)
         else:
-            ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS+1)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
-            STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS+1)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            #ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS+1)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            #STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS+1)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            ELITE_STEP_SIZE = get_step(runs, True, 1)
+            STEP_SIZE = get_step(runs, False, 1)
         
         #Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
