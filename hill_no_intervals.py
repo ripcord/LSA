@@ -26,6 +26,7 @@ ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
 ELITE_CLIMBS = 10               #Number of times to hill climb for the elite point
 STAGNANT_RUN_CAP = 100          #Maximum number of allowable runs for which the fitness value does not improve
+RESULTS = {}                    #Set of evaluation result information (actual iterations, fitness, elite coordinates, evaluation number)
 FITNESS_EVALS = None            #Number of fitness evaluations (optional)
 OUTPUT_FILE = None              #Handler for output file (optional)
 
@@ -87,6 +88,23 @@ def file_prep():
     OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M:%S")))
     OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
         NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
+    return
+
+#Writes the best fitness to STDOUT and/or an output file
+def print_best(data, write_to_file=False, out_file=None):
+    i = 1
+    temp = None
+    temp = data[1][0]
+    for k in sorted(data.keys()):
+        if data[k][0] > temp:
+            temp = data[k][0]
+            i = k
+    print("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:", i, data[i][2],\
+            data[i][1], "Fitness:", temp))
+    if write_to_file:
+        if out_file:
+            out_file.write("\n\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
+                i, data[i][2], data[i][1], "Fitness:", temp))
     return
 
 #Get arguments from cmd, they go as follows {arg1: X points, arg2: N dimensions}
@@ -276,6 +294,9 @@ while evals < FITNESS_EVALS:
 
     evals += 1
 
+    #This needs to be after "evals += 1" !!!
+    RESULTS[evals] = [fitness(ELITE_DATASET), ELITE_DATASET, completed_runs - STAGNANT_RUN_CAP]
+
     #print("--*FULL DATASET AFTER:\n", DATASET)
     #print("--*DIMENSION MIDPOINT:\n", DIMENSIONAL_MIDPOINT)
     #print("--*BEST DATA:", ELITE_DATASET, "| FITNESS:", fitness(ELITE_DATASET))
@@ -285,7 +306,11 @@ while evals < FITNESS_EVALS:
 
     output(evals, completed_runs, runtime)
     #print("\tRuns:", optimum_runs)
-    
+
+if OUTPUT_FILE:
+    print_best(RESULTS, True, OUTPUT_FILE)
+else:
+    print_best(RESULTS)
 
 t_runtime = timeit.default_timer() - COMP_TIME
 
