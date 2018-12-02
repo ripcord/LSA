@@ -123,15 +123,12 @@ def file_prep():
                 if re.search('Trial', line, re.I):
                     t_num = re.search(r'\d+',line.rstrip()).group()
                     break
-    else:
-        print("File '", OUTPUT_FILE, "' does not exist")
-        exit()
     OUTPUT_FILE = open(OUTPUT_FILE, "a+")
     OUTPUT_FILE.write("\n\n<{}>\n{:^80}\nDate: {}".format("+" * 90, "<- Trial #" + str(int(t_num) + 1) + " ->",\
         str(datetime.datetime.now().strftime("%Y-%m-%d"))))
     OUTPUT_FILE.write("\nTime: {}".format(datetime.datetime.now().strftime("%H:%M.%S")))
-    OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n".format(FITNESS_EVALS,\
-        NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: "))
+    OUTPUT_FILE.write("\n\nFitness Evaluations: {0}\n{3:>21}{1}\n{4:>21}{2}\n{5:>21}{6}\n".format(FITNESS_EVALS,\
+        NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, "Dimensions: ", "Points: ", "Optimum: ", "Minimum" if FITNESS_MIN else "Maximum"))
     return
 
 #Writes the best fitness to STDOUT and/or an output file
@@ -148,11 +145,11 @@ def print_best(data, out_file=None):
             if data[k][0] > temp:
                 temp = data[k][0]
                 i = k
-    print("\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
+    print("\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Global Minimum |" if FITNESS_MIN else "| Global Maximum |"))
     print("{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:", i, data[i][2],\
             data[i][1], "Fitness:", temp))
     if out_file:
-        out_file.write("\n\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Optimum Result |"))
+        out_file.write("\n\n\t{0:>19}\n\t{1:>19}\n\t{0:>19}".format("-" * 18,"| Global Minimum |" if FITNESS_MIN else "| Global Maximum |"))
         out_file.write("\n{:>18} {}\nActual Iterations: {}\nElite Coordinates: {}\n{:>18} {}".format("Best Evaluation:",\
             i, data[i][2], data[i][1], "Fitness:", temp))
     return
@@ -254,8 +251,8 @@ if OUTPUT_FILE:
     file_prep()
 
 
-print("\nFitness Evaluations: {}\n{:>21}{}\n{:>21}{}\n".format(FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
-    "Points: ", NUMBER_OF_POINTS))
+print("\nFitness Evaluations: {}\n{:>21}{}\n{:>21}{}\n{:>21}{}\n".format(FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
+    "Points: ", NUMBER_OF_POINTS, "Optimum: ","Minimum" if FITNESS_MIN else "Maximum"))
 
 evals = 0
 
