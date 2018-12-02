@@ -273,7 +273,6 @@ while evals < FITNESS_EVALS:
     runs = 1
     completed_runs = 0
     stagnant_runs = 0
-    stag = 0
     runtime = 0.0
 
    
@@ -386,14 +385,12 @@ while evals < FITNESS_EVALS:
    #     if ((fitness(ELITE_DATASET) - prev_fitness) <= 0.0):
         if FITNESS_MIN:
             if ((fitness(ELITE_DATASET) - prev_fitness) >= 0.0):
-                stag += 1
+                stagnant_runs += 1
         else:
             if ((fitness(ELITE_DATASET) - prev_fitness) <= 0.0):
-                stag += 1
-        if stag == STAGNANT_RUN_CAP:
+                stagnant_runs += 1
+        if stagnant_runs == STAGNANT_RUN_CAP:
             completed_runs = runs
-            stagnant_runs = stag
-            stag = 0
             runtime = timeit.default_timer() - start_time
             runs = ITERS + 1
 ###
