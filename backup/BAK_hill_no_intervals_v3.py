@@ -102,11 +102,11 @@ def get_step(runs, elite=False, nd_offset=None):
 
 #Sets global search interval (optimization function-dependent)
 def get_bounds():
-    if fitness([2, 2]) == elvis_needs_boats([2, 2]):
+    if fitness((2, 2)) == elvis_needs_boats((2, 2)):
         return (-8, 8)
-    elif fitness([2, 2]) == rastrigin([2, 2]):
+    elif fitness((2, 2)) == rastrigin((2, 2)):
         return (-5.12, 5.12)
-    elif fitness([2, 2]) == eggholder([2, 2]):
+    elif fitness((2, 2)) == eggholder((2, 2)):
         return (-512, 512)
     else:
         return (-8, 8)
