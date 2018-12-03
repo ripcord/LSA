@@ -20,7 +20,7 @@ NUMBER_OF_DIMENSIONS = None     #Number of dimensions
 DATASET = None                  #Set of all points and their given positions
 DIMENSIONAL_MIDPOINT = None     #Set of all midpoints for each dimension
 ELITE_DATASET = None            #The elite point, AKA the point with the best fitness
-BOUNDS = (-8, 8)                #The global search interval
+BOUNDS = None                   #The global search interval
 STEP_SIZE = None                #Step size for all non-elite points
 ELITE_STEP_SIZE = None          #Step size for elite point
 ITERS = 1000                    #Number of iterations
@@ -35,6 +35,7 @@ FITNESS_MIN = False             #Switch to enable finding global minimum rather 
 #Fitness function "Elvis Needs Boats"
 #2D optimum = ~0.41
 def elvis_needs_boats(data):
+    global NUMBER_OF_DIMENSIONS
     temp = 0.0
     sin_temp = 0.0
     fitness = 0.0
@@ -47,15 +48,27 @@ def elvis_needs_boats(data):
 #Fitness function "Rastrigin"
 #Global minimum at "f(0,...,0) = 0"
 def rastrigin(data):
+    global NUMBER_OF_DIMENSIONS
     fitness = 0.0
     for i in range(0, NUMBER_OF_DIMENSIONS):
         fitness += (data[i]**2) - 10 * math.cos(2 * math.pi * data[i])
     fitness += (10 * NUMBER_OF_DIMENSIONS)
     return fitness
 
+def eggholder(data):
+    global NUMBER_OF_DIMENSIONS
+    fitness = 0.0
+    if NUMBER_OF_DIMENSIONS > 2:
+        print("Error: Eggholder function only accepts 2 dimensions")
+        exit()
+    else:
+        fitness = -(data[1] + 47) * np.sin(np.sqrt(abs(data[1] + (data[0] /2) + 47))) + (-data[0] * np.sin(np.sqrt(abs(data[0] - (data[1] - 47)))))
+    return fitness
+
 def fitness(data):
     return elvis_needs_boats(data)
     #return rastrigin(data)
+    #return eggholder(data)
 
 #Compares fitness of two values "a" and "b"
 def comp_fitness(a, b, equals=None):
@@ -86,6 +99,17 @@ def get_step(runs, elite=False, nd_offset=None):
             return ((1.0/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         else:
             return ((1.0/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+
+#Sets global search interval (optimization function-dependent)
+def get_bounds():
+    if fitness([2, 2]) == elvis_needs_boats([2, 2]):
+        return (-8, 8)
+    elif fitness([2, 2]) == rastrigin([2, 2]):
+        return (-5.12, 5.12)
+    elif fitness([2, 2]) == eggholder([2, 2]):
+        return (-512, 512)
+    else:
+        return (-8, 8)
 
 #Output to a file and/or STDOUT
 def output(evaluations, comp_runs, stag_runs, l_runtime, out_file=None):
@@ -237,6 +261,8 @@ else:
     print_usage()
     exit()
 
+
+BOUNDS = get_bounds()
 
 #ELITE_STEP_SIZE= 1/math.log(NUMBER_OF_DIMENSIONS)
 #STEP_SIZE = 1/math.log(NUMBER_OF_DIMENSIONS)
