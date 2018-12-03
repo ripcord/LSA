@@ -15,18 +15,52 @@ SCHAFFER = "SCHAFFER"
 RASTRIGIN = "RASTRIGIN"
 EGGHOLDDER = "EGGHOLDER"
 
+#def getFunction(name):
+#    if name == ELVIS_NEEDS_BOATS:
+#        return 
 
-def getFunction(name, dim, x, y):
-    function = []
+
+def getOutput(name, dim, wolves, x):
+    print("dimensions", dim)
+    outputPoints = 10**2
+    #output = []
     if name == ELVIS_NEEDS_BOATS:
-        temp = 0.0
-        sin_temp = 0.0
-        fitness = 0.0
-        for i in range(0, dim):
-            temp += (x[i] + ((-1)**(i+1))*((i+1)%4))**2
-            sin_temp += x[i]**(i+1)
-        fitness = -math.sqrt(temp) + math.sin(sin_temp)
-        return fitness
+        dimensionPoints = np.linspace(-x,x, outputPoints)
+        print("Dimensionpoints.shape", dimensionPoints.shape)
+        Y = np.zeros((outputPoints))
+        print("Y.shape", Y.shape)
+        #xShape = X.shape
+        #Y = np.zeros((outputPoints))
+        #print(xShape[0]/dim)
+        #X = X.reshape(dim, int(xShape[0]/dim))
+        #yShape = dimensionPoints.shape
+        #Y = np.zeros((yShape[0]* yShape[1]))
+        #print(Y.shape)
+
+        #print("shape of X", X.shape)
+        #Y = np.linspace(-y, y, 10**2)
+
+        #X, Y = np.meshgrid(X, Y)
+
+        for point in range(0, outputPoints):
+            temp = 0.0
+            sin_temp = 0.0
+            fitness = 0.0
+            for dimension in range(0, dim):
+                #print("dimension", dimension)
+                #print("point", point, " dimension", dimension, ":", dimensionPoints[dim][point])
+                temp += (dimensionPoints[point] + ((-1)**(dimension+1))*((dimension+1)%4))**2
+                sin_temp += dimensionPoints[point]**(dimension+1)
+            Y[point] = -math.sqrt(temp) + math.sin(sin_temp)
+        print("Max of Y", np.amax(Y, axis = 0))
+        yMax = np.argmax((Y))
+        print("Best x values", dimensionPoints[yMax])
+        print("Y.shape", Y.shape)
+        #print("Y is", list(Y))
+        #print("Y is", Y)
+        #print("y shaoe", Y.shape)
+        #print("Y", Y)
+        return dimensionPoints, Y, dimensionPoints[yMax]
     elif name == SCHAFFER:
         raise ValueError("Not implemented yet")
     elif name == RASTRIGIN:
@@ -66,6 +100,7 @@ def elvis_needs_boats(data):
 def fitness(data):
     return elvis_needs_boats(data)
 
+
 #Get arguments from cmd, they go as follows {arg1: X points, arg2: N dimensions}
 #X points on N dimensions
 if (len(sys.argv) == 3 ):
@@ -102,18 +137,23 @@ else:
 #PLOT = False
 PLOT = True
 
+# CHANGE FOR DIFFERENT FUNCTIONS
 functionName = ELVIS_NEEDS_BOATS
 
-if PLOT:
-    xLinespace = np.linspace(-8,8,100)
-    yLinespace = np.linspace(-8,8,100)
 
-    X, Y = np.meshgrid(xLinespace, yLinespace)
+if PLOT:
+    #xLinespace = np.linspace(-8,8,100)
+    #yLinespace = np.linspace(-8,8,100)
+
+    #X, Y = np.meshgrid(xLinespace, yLinespace)
 
     x = 8
-    y = 8
-    z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
-    plot(z, NUMBER_OF_DIMENSIONS, x, y)
+    #y = 8
+    input, z, bestX = getOutput(functionName, NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, x)
+    test = [bestX, bestX]
+    print("Test fitness", fitness(test))
+    #z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
+    plot(input, z, NUMBER_OF_DIMENSIONS)
 
 if not FITNESS_EVALS:
     FITNESS_EVALS = 1
