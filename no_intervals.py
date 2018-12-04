@@ -2,6 +2,9 @@ from __future__ import print_function
 from __future__ import division
 
 import sys
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 import math
 import numpy as np
 import random
@@ -14,6 +17,30 @@ import re
 
 #Time for total program execution (approx.)
 COMP_TIME = timeit.default_timer()
+
+ELVIS_NEEDS_BOATS = "ELVIS"
+SCHAFFER = "SCHAFFER"
+RASTRIGIN = "RASTRIGIN"
+EGGHOLDDER = "EGGHOLDER"
+
+def getOutput(name, leftBound, rightBound):
+    pointsOnLine = 10**2
+    if name == ELVIS_NEEDS_BOATS:
+        X = np.linspace(leftBound, rightBound, pointsOnLine)
+        Y = X
+        X, Y = np.meshgrid(X, Y)
+        Z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
+        return X, Y, Z
+    elif name == SCHAFFER:
+        raise ValueError("Not implemented yet")
+    elif name == RASTRIGIN:
+        raise ValueError("Not implemented yet")
+    elif name == EGGHOLDDER:
+        raise ValueError("Not implemented yet")
+    else:
+        raise ValueError("Function not known")
+        
+
 
 NUMBER_OF_POINTS = None         #Number of points
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -34,6 +61,7 @@ FITNESS_MIN = False             #Switch to enable finding global minimum rather 
 
 #Fitness function "Elvis Needs Boats"
 #2D optimum = ~0.41
+
 def elvis_needs_boats(data):
     global NUMBER_OF_DIMENSIONS
     temp = 0.0
@@ -274,6 +302,28 @@ BOUNDS = get_bounds()
 #print(STEP_SIZE)
 #print(ELITE_STEP_SIZE)
 
+#PLOT = False
+PLOT = True
+
+# CHANGE FOR DIFFERENT FUNCTIONS
+functionName = ELVIS_NEEDS_BOATS
+
+
+
+if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.view_init(60,35)
+    '''
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Fitness')
+    ax.set_xlim(BOUNDS[0], BOUNDS[1])
+    ax.set_ylim(BOUNDS[0], BOUNDS[1])
+    ax.set_zlim(BOUNDS[0], BOUNDS[1])
+    '''
+
+
 if not FITNESS_EVALS:
     FITNESS_EVALS = 1
 
@@ -291,16 +341,23 @@ while evals < FITNESS_EVALS:
     #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
     #Creating the "followers"
     DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
-     
-    
+    datasetFitness = np.full((NUMBER_OF_POINTS), None)
+    #print(datasetFitness)
+
     # for INDEX, VALUE in ITERABLE:
     for point , i in enumerate(DATASET):
         for dim, x in enumerate(i):
             DATASET[point][dim] = random.uniform(BOUNDS[0], BOUNDS[1])
-    #print("--*FULL DATASET BEFORE:\n",DATASET)
-
-
+    #print("dataset initialized", DATASET)
+    #print(DATASET)
+    for i in range(len(DATASET)):
+        #print(i)
+        #print(DATASET[i])
+        #print("Dataset", DATASET[i])
+        datasetFitness[i] = fitness(DATASET[i])
+       
     #Meat of the program, Merge/Fitness Function portion of the program
+    #print(datasetFitness)
     runs = 1
     completed_runs = 0
     stagnant_runs = 0
@@ -326,15 +383,35 @@ while evals < FITNESS_EVALS:
             STEP_SIZE = get_step(runs, False, 1)
         
         #Determine best dataset => ELITE_DATASET
-        # 1 point per dimension. there can only be 1 best
-        for i in DATASET:
-            #print(i, fitness(i))
 
-####
+        if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Fitness')
+            
+            x, y, z = getOutput(functionName, BOUNDS[0], BOUNDS[1])
+            ax.plot_surface(x, y, z, rstride=1, cstride=1,
+                cmap='gray', linewidth=0.08,
+                antialiased=True)
+            
+            best = list(datasetFitness).index(np.amax(datasetFitness, axis=-1))
+            ax.scatter3D(DATASET[best][0], DATASET[best][1], datasetFitness[best]+0.5, s=200, c='yellow',marker='D', alpha=1, edgecolor='white')
+            for i in range(len(DATASET)):
+                if i != best:
+                    ax.scatter3D(DATASET[i][0], DATASET[i][1], datasetFitness[i]+0.5, s=200, c='orange',alpha=1, edgecolor='white')
+            fig.canvas.draw()
+            plt.show(block=False)
+            plt.pause(0.05)
+
+        ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+        STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+
+        # Determine best dataset => ELITE_DATASET
+        # 1 point per dimension. there can only be 1 best
+        for index in range(len(DATASET)):
+            i = DATASET[index]
     #        if fitness(i) > fitness(ELITE_DATASET):
             if comp_fitness(i, ELITE_DATASET):
-####
-                #print("Old Best:", fitness(ELITE_DATASET), "New Best:", fitness(i))
                 ELITE_DATASET = copy.deepcopy(i[:])
 
         prev_fitness = fitness(ELITE_DATASET)
@@ -356,7 +433,7 @@ while evals < FITNESS_EVALS:
         dimensions_to_change = random.sample(range(0, NUMBER_OF_DIMENSIONS), random.randint(0, NUMBER_OF_DIMENSIONS))
         #print(dimensions_to_change)
         
-        #move in those specific random dimensions toward middle
+        # Move in those specific random dimensions toward middle
         for point, x in enumerate(DATASET):
             #print(point, ":DATASET:", DATASET[point], "\nELITE_DATASET", ELITE_DATASET)
 
@@ -400,13 +477,13 @@ while evals < FITNESS_EVALS:
                 for i in dimensions_to_change:
                     if(x[i] < DIMENSIONAL_MIDPOINT[i]):
                         DATASET[point][i] += random.uniform(0, STEP_SIZE)
-                        #DATASET[point][i] += STEP_SIZE
                     if(x[i] > DIMENSIONAL_MIDPOINT[i]):
                         DATASET[point][i] -= random.uniform(0, STEP_SIZE)
-                        #DATASET[point][i] -= STEP_SIZE
-            #print(DATASET)
 
-        
+            # Update the fitness of all wolves
+            for i in range(len(DATASET)):
+                datasetFitness[i] = fitness(DATASET[i])
+
         runs += 1
 
         #if(prev_fitness < fitness(ELITE_DATASET)):

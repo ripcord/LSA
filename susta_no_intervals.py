@@ -1,4 +1,5 @@
 from __future__ import print_function
+import Plot_Graph
 
 import sys
 import math
@@ -6,6 +7,11 @@ import numpy as np
 import random
 import time
 import copy
+
+#plot = False
+plot = True
+
+
 
 NUMBER_OF_POINTS = None         #Number of followers (wolves)
 NUMBER_OF_DIMENSIONS = None     #Number of dimensions
@@ -45,6 +51,7 @@ def fitness(data):
     term1 = math.cos(math.sin(abs(data[0]**2 - data[1]**2))) - 0.5
     term2 = (1 + 0.001 * (data[0]**2 + data[1]**2)) ** 2
     fitness = 0.5 + term1 / term2
+
     
     return fitness
 
@@ -77,6 +84,11 @@ runs = 0
 #Meat of the program, Merge/Fitness Function portion of the program
 
 ELITE_DATASET = DATASET[0]
+
+if plot == True:
+    x = 8
+    y = 8
+    plot(fitness, NUMBER_OF_DIMENSIONS, x, y)
 
 while True:
     #Determine best dataset => ELITE_DATASET
