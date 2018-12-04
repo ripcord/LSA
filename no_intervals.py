@@ -302,8 +302,12 @@ BOUNDS = get_bounds()
 #print(STEP_SIZE)
 #print(ELITE_STEP_SIZE)
 
+
+
 #PLOT = False
 PLOT = True
+
+
 
 # CHANGE FOR DIFFERENT FUNCTIONS
 functionName = ELVIS_NEEDS_BOATS
@@ -314,14 +318,6 @@ if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.view_init(60,35)
-    '''
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Fitness')
-    ax.set_xlim(BOUNDS[0], BOUNDS[1])
-    ax.set_ylim(BOUNDS[0], BOUNDS[1])
-    ax.set_zlim(BOUNDS[0], BOUNDS[1])
-    '''
 
 
 if not FITNESS_EVALS:
@@ -401,7 +397,9 @@ while evals < FITNESS_EVALS:
                     ax.scatter3D(DATASET[i][0], DATASET[i][1], datasetFitness[i]+0.5, s=200, c='orange',alpha=1, edgecolor='white')
             fig.canvas.draw()
             plt.show(block=False)
-            plt.pause(0.05)
+            plt.pause(0.005)
+            plt.cla()
+            print()
 
         ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
@@ -483,6 +481,9 @@ while evals < FITNESS_EVALS:
             # Update the fitness of all wolves
             for i in range(len(DATASET)):
                 datasetFitness[i] = fitness(DATASET[i])
+
+            #for index in range(len(DATASET)):
+            #    print(DATASET[index], datasetFitness[index])
 
         runs += 1
 
