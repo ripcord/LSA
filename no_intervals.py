@@ -1,8 +1,10 @@
 from __future__ import print_function
 from __future__ import division
-from Plot_Graph import plot
 
 import sys
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
 import math
 import numpy as np
 import random
@@ -15,52 +17,14 @@ SCHAFFER = "SCHAFFER"
 RASTRIGIN = "RASTRIGIN"
 EGGHOLDDER = "EGGHOLDER"
 
-#def getFunction(name):
-#    if name == ELVIS_NEEDS_BOATS:
-#        return 
-
-
-def getOutput(name, dim, wolves, x):
-    print("dimensions", dim)
-    outputPoints = 10**2
-    #output = []
+def getOutput(name, leftBound, rightBound):
+    pointsOnLine = 10**2
     if name == ELVIS_NEEDS_BOATS:
-        dimensionPoints = np.linspace(-x,x, outputPoints)
-        print("Dimensionpoints.shape", dimensionPoints.shape)
-        Y = np.zeros((outputPoints))
-        print("Y.shape", Y.shape)
-        #xShape = X.shape
-        #Y = np.zeros((outputPoints))
-        #print(xShape[0]/dim)
-        #X = X.reshape(dim, int(xShape[0]/dim))
-        #yShape = dimensionPoints.shape
-        #Y = np.zeros((yShape[0]* yShape[1]))
-        #print(Y.shape)
-
-        #print("shape of X", X.shape)
-        #Y = np.linspace(-y, y, 10**2)
-
-        #X, Y = np.meshgrid(X, Y)
-
-        for point in range(0, outputPoints):
-            temp = 0.0
-            sin_temp = 0.0
-            fitness = 0.0
-            for dimension in range(0, dim):
-                #print("dimension", dimension)
-                #print("point", point, " dimension", dimension, ":", dimensionPoints[dim][point])
-                temp += (dimensionPoints[point] + ((-1)**(dimension+1))*((dimension+1)%4))**2
-                sin_temp += dimensionPoints[point]**(dimension+1)
-            Y[point] = -math.sqrt(temp) + math.sin(sin_temp)
-        print("Max of Y", np.amax(Y, axis = 0))
-        yMax = np.argmax((Y))
-        print("Best x values", dimensionPoints[yMax])
-        print("Y.shape", Y.shape)
-        #print("Y is", list(Y))
-        #print("Y is", Y)
-        #print("y shaoe", Y.shape)
-        #print("Y", Y)
-        return dimensionPoints, Y, dimensionPoints[yMax]
+        X = np.linspace(leftBound, rightBound, pointsOnLine)
+        Y = X
+        X, Y = np.meshgrid(X, Y)
+        Z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
+        return X, Y, Z
     elif name == SCHAFFER:
         raise ValueError("Not implemented yet")
     elif name == RASTRIGIN:
@@ -141,19 +105,20 @@ PLOT = True
 functionName = ELVIS_NEEDS_BOATS
 
 
-if PLOT:
-    #xLinespace = np.linspace(-8,8,100)
-    #yLinespace = np.linspace(-8,8,100)
 
-    #X, Y = np.meshgrid(xLinespace, yLinespace)
+if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.view_init(60,35)
+    '''
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Fitness')
+    ax.set_xlim(BOUNDS[0], BOUNDS[1])
+    ax.set_ylim(BOUNDS[0], BOUNDS[1])
+    ax.set_zlim(BOUNDS[0], BOUNDS[1])
+    '''
 
-    x = 8
-    #y = 8
-    input, z, bestX = getOutput(functionName, NUMBER_OF_DIMENSIONS, NUMBER_OF_POINTS, x)
-    test = [bestX, bestX]
-    print("Test fitness", fitness(test))
-    #z = -np.sqrt((X-1)**2 + (Y+2)**2) + np.sin(X + Y**2)
-    plot(input, z, NUMBER_OF_DIMENSIONS)
 
 if not FITNESS_EVALS:
     FITNESS_EVALS = 1
@@ -164,16 +129,23 @@ while evals < FITNESS_EVALS:
     #CREATION OF THE ARRAY OF X POINTS ON N DIMENSIONS => DATASET
     #Creating the "followers"
     DATASET = np.full((NUMBER_OF_POINTS, NUMBER_OF_DIMENSIONS), None)
-
+    datasetFitness = np.full((NUMBER_OF_POINTS), None)
+    #print(datasetFitness)
 
     # for INDEX, VALUE in ITERABLE:
     for point , i in enumerate(DATASET):
         for dim, x in enumerate(i):
             DATASET[point][dim] = random.uniform(BOUNDS[0], BOUNDS[1])
-    #print("--*FULL DATASET BEFORE:\n",DATASET)
-
-
+    #print("dataset initialized", DATASET)
+    #print(DATASET)
+    for i in range(len(DATASET)):
+        #print(i)
+        #print(DATASET[i])
+        #print("Dataset", DATASET[i])
+        datasetFitness[i] = fitness(DATASET[i])
+       
     #Meat of the program, Merge/Fitness Function portion of the program
+    #print(datasetFitness)
     runs = 1
     optimum_runs = 0
 
@@ -182,15 +154,35 @@ while evals < FITNESS_EVALS:
 #        while True:
     start_time = timeit.default_timer()
     while runs <= ITERS:
+
+        if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Fitness')
+            
+            x, y, z = getOutput(functionName, BOUNDS[0], BOUNDS[1])
+            ax.plot_surface(x, y, z, rstride=1, cstride=1,
+                cmap='gray', linewidth=0.08,
+                antialiased=True)
+            
+            best = list(datasetFitness).index(np.amax(datasetFitness, axis=-1))
+            ax.scatter3D(DATASET[best][0], DATASET[best][1], datasetFitness[best]+0.5, s=200, c='yellow',marker='D', alpha=1, edgecolor='white')
+            for i in range(len(DATASET)):
+                if i != best:
+                    ax.scatter3D(DATASET[i][0], DATASET[i][1], datasetFitness[i]+0.5, s=200, c='orange',alpha=1, edgecolor='white')
+            fig.canvas.draw()
+            plt.show(block=False)
+            plt.pause(0.05)
+
         ELITE_STEP_SIZE = ((0.8/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
-        #Determine best dataset => ELITE_DATASET
+        # Determine best dataset => ELITE_DATASET
         # 1 point per dimension. there can only be 1 best
-        for i in DATASET:
-            #print(i, fitness(i))
+        for index in range(len(DATASET)):
+            i = DATASET[index]
             if fitness(i) > fitness(ELITE_DATASET):
-                #print("Old Best:", fitness(ELITE_DATASET), "New Best:", fitness(i))
+                #print("best changed")
                 ELITE_DATASET = copy.deepcopy(i[:])
 
         prev_fitness = fitness(ELITE_DATASET)
@@ -206,11 +198,10 @@ while evals < FITNESS_EVALS:
         dimensions_to_change = random.sample(range(0, NUMBER_OF_DIMENSIONS), random.randint(0, NUMBER_OF_DIMENSIONS))
         #print(dimensions_to_change)
         
-        #move in those specific random dimensions toward middle
+        # Move in those specific random dimensions toward middle
         for point, x in enumerate(DATASET):
             #print(point, ":DATASET:", DATASET[point], "\nELITE_DATASET", ELITE_DATASET)
             if fitness(DATASET[point]) >= fitness(ELITE_DATASET):
-                
                 ELITE_DATASET = copy.deepcopy(DATASET[point])
 
                 #Hill climbing for the elite point
@@ -219,7 +210,7 @@ while evals < FITNESS_EVALS:
                         TEMP = copy.deepcopy(DATASET[point])
                         
                         DATASET[point][i] += random.uniform(0,ELITE_STEP_SIZE)
-                        
+                                                
                         if not (fitness(DATASET[point]) > fitness(TEMP)):
                             for x in range(NUMBER_OF_DIMENSIONS):
                                 DATASET[point][x] = TEMP[x]
@@ -232,16 +223,17 @@ while evals < FITNESS_EVALS:
                             #if(fitness(DATASET[point]) > fitness(ELITE_DATASET)):
                                 #print("HILLCLIMBING => Old Best:", fitness(DATASET[point]), "New Best:", fitness(ELITE_DATASET)) 
                         ELITE_DATASET = copy.deepcopy(DATASET[point]) #CRITICAL LINE!
-
+                        
             else:
                 for i in dimensions_to_change:
                     if(x[i] < DIMENSIONAL_MIDPOINT[i]):
                         DATASET[point][i] += random.uniform(0, STEP_SIZE)
-                        #DATASET[point][i] += STEP_SIZE
                     if(x[i] > DIMENSIONAL_MIDPOINT[i]):
                         DATASET[point][i] -= random.uniform(0, STEP_SIZE)
-                        #DATASET[point][i] -= STEP_SIZE
-            #print(DATASET)
+
+            # Update the fitness of all wolves
+            for i in range(len(DATASET)):
+                datasetFitness[i] = fitness(DATASET[i])
 
         runs += 1
 
@@ -254,7 +246,22 @@ while evals < FITNESS_EVALS:
                 optimum_runs = runs
                 runtime = timeit.default_timer() - start_time
                 runs = ITERS + 1
+        #print(datasetFitness)
 
+        #print(datasetFitness[best])
+
+        #best = list(datasetFitness).index(np.amax(datasetFitness, axis=-1))
+        #ax.scatter(DATASET[best][0], DATASET[best][1], datasetFitness[best], s=100, marker="D", c='purple',alpha=1, edgecolor='white')
+        #for i in range(len(DATASET)):
+        #    if i != best:
+        #        ax.scatter(DATASET[i][0], DATASET[i][1], datasetFitness[i], s=100, c='red',alpha=1, edgecolor='white')
+        #        plt.draw()
+        #plt.draw()
+        #plt.show()
+        #best = list(datasetFitness).index(np.amax(datasetFitness, axis=-1))
+        #print("best eval", fitness(ELITE_DATASET), "foundBest", datasetFitness[best])
+
+    #plt.show()
     evals += 1
 
     #print("--*FULL DATASET AFTER:\n", DATASET)
