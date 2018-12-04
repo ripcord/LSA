@@ -89,7 +89,8 @@ def get_step(runs, elite=False, nd_offset=None):
     global NUMBER_OF_DIMENSIONS
     global NUMBER_OF_POINTS
     global BOUNDS
-    if elite:
+    return 1/math.log(NUMBER_OF_DIMENSIONS)
+    '''if elite:
         if nd_offset:
             return ((0.8/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         else:
@@ -98,15 +99,16 @@ def get_step(runs, elite=False, nd_offset=None):
         if nd_offset:
             return ((1.0/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
         else:
-            return ((1.0/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
+            return ((1.0/math.log(NUMBER_OF_DIMENSIONS)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]'''
 
 #Sets global search interval (optimization function-dependent)
 def get_bounds():
-    if fitness((2, 2)) == elvis_needs_boats((2, 2)):
+    global NUMBER_OF_DIMENSIONS
+    if fitness(tuple(range(NUMBER_OF_DIMENSIONS))) == elvis_needs_boats(tuple(range(NUMBER_OF_DIMENSIONS))):
         return (-8, 8)
-    elif fitness((2, 2)) == rastrigin((2, 2)):
+    elif fitness(tuple(range(NUMBER_OF_DIMENSIONS))) == rastrigin(tuple(range(NUMBER_OF_DIMENSIONS))):
         return (-5.12, 5.12)
-    elif fitness((2, 2)) == eggholder((2, 2)):
+    elif fitness(tuple(range(NUMBER_OF_DIMENSIONS))) == eggholder(tuple(range(NUMBER_OF_DIMENSIONS))):
         return (-512, 512)
     else:
         return (-8, 8)
