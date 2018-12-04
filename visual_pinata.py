@@ -381,6 +381,7 @@ while evals < FITNESS_EVALS:
         #Determine best dataset => ELITE_DATASET
 
         if PLOT and NUMBER_OF_DIMENSIONS == 2 and functionName == ELVIS_NEEDS_BOATS:
+            print(DATASET, datasetFitness)
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             ax.set_zlabel('Fitness')
@@ -421,12 +422,12 @@ while evals < FITNESS_EVALS:
         #STEP_SIZE = ((1.0/math.log(NUMBER_OF_DIMENSIONS)) *  (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
 
         #Find the midpoint of all the points
-        DIMENSIONAL_MIDPOINT = np.full((NUMBER_OF_DIMENSIONS, 1), None)
-        for index, i in enumerate(DATASET.T):
-            DIMENSIONAL_MIDPOINT[index] = np.mean(i)
-        #print("THE MIDPOINT", DIMENSIONAL_MIDPOINT)
-
-
+        #DIMENSIONAL_MIDPOINT = np.full((NUMBER_OF_DIMENSIONS, 1), None)
+        #for index, i in enumerate(DATASET.T):
+        #    DIMENSIONAL_MIDPOINT[index] = np.mean(i)
+        DIMENSIONAL_MIDPOINT = ELITE_DATASET[:]
+        print("THE MIDPOINT", DIMENSIONAL_MIDPOINT)
+        
         #random dimensions to change
         dimensions_to_change = random.sample(range(0, NUMBER_OF_DIMENSIONS), random.randint(0, NUMBER_OF_DIMENSIONS))
         #print(dimensions_to_change)

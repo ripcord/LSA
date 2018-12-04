@@ -30,7 +30,6 @@ RESULTS = {}                    #Set of evaluation result information (actual it
 FITNESS_EVALS = None            #Number of fitness evaluations (optional)
 OUTPUT_FILE = None              #Handler for output file (optional)
 FITNESS_MIN = False             #Switch to enable finding global minimum rather than maximum
-FITNESS_RUNS = 0
 
 
 #Fitness function "Elvis Needs Boats"
@@ -74,9 +73,15 @@ def comp_fitness(a, b, equals=None):
 
 #Returns a step size, variable for elite and non-elite points
 def get_step(runs, elite=False, nd_offset=None):
+    global ELITE_DATASET
     global NUMBER_OF_DIMENSIONS
     global NUMBER_OF_POINTS
     global BOUNDS
+    
+    #temp = (fitness(ELITE_DATASET) + math.log(abs(runs)))
+    #print(fitness(ELITE_DATASET) + temp)
+    #print("******", math.atanh(-.9))
+    #return math.atanh(fitness(ELITE_DATASET) + temp) + 1.0
     if elite:
         if nd_offset:
             return ((0.8/math.log(NUMBER_OF_DIMENSIONS + nd_offset)) * (NUMBER_OF_POINTS/runs*4)) % BOUNDS[1]
@@ -93,8 +98,6 @@ def output(evaluations, comp_runs, stag_runs, l_runtime, out_file=None):
     global ELITE_DATASET
     global ITERS
     global STAGNANT_RUN_CAP
-    global FITNESS_RUNS
-    
     if out_file:
         out_file.write("\n*-->Evaluation #{}:\n".format(evaluations))
         out_file.write("\tElite Point Coordinates: {}\n".format(ELITE_DATASET))
@@ -103,19 +106,14 @@ def output(evaluations, comp_runs, stag_runs, l_runtime, out_file=None):
             comp_runs - stag_runs))
         out_file.write("\n\t{:>25}{:.5f} sec\n".format("Approximate Runtime: ", l_runtime))
         out_file.write("\n\t{:>24} {} ***\n".format("*** FITNESS:", fitness(ELITE_DATASET)))
-    
-    
     else:
-        '''
         print("*-->Evaluation #{}:".format(evaluations))
         print("\tElite Point Coordinates: {}".format(ELITE_DATASET))
         print("\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}\n\t{:>25}{}".format("Maximum Iterations: ", ITERS, "Completed Iterations: ", comp_runs,\
             "Stagnant Iterations: ", stag_runs, "Actual Iterations: ", comp_runs - stag_runs))
         print("\n\t{:>24} {:.5f} sec\n".format("Approximate Runtime:", l_runtime))
         print("\t{:>25}{} ***\n".format("*** FITNESS: ",fitness(ELITE_DATASET)))
-        '''
-        print("Number of fitness function runs: ", FITNESS_RUNS)
-   
+
     return
 
 #Writes logging headers to an output file
@@ -259,8 +257,8 @@ if OUTPUT_FILE:
     file_prep()
 
 
-#print("\nFitness Evaluations: {}\n{:>21}{}\n{:>21}{}\n{:>21}{}\n".format(FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
-    #"Points: ", NUMBER_OF_POINTS, "Optimum: ","Minimum" if FITNESS_MIN else "Maximum"))
+print("\nFitness Evaluations: {}\n{:>21}{}\n{:>21}{}\n{:>21}{}\n".format(FITNESS_EVALS, "Dimensions: ", NUMBER_OF_DIMENSIONS,\
+    "Points: ", NUMBER_OF_POINTS, "Optimum: ","Minimum" if FITNESS_MIN else "Maximum"))
 
 evals = 0
 
@@ -371,7 +369,6 @@ while evals < FITNESS_EVALS:
                         
                         #CRITICAL LINE!
                         ELITE_DATASET = copy.deepcopy(DATASET[point])
-                        print(FITNESS_RUNS, fitness(ELITE_DATASET))
 
             #Non-elite Points
             else:
@@ -426,17 +423,17 @@ while evals < FITNESS_EVALS:
     if OUTPUT_FILE:
         output(evals, completed_runs, stagnant_runs, runtime, OUTPUT_FILE)
 
-    #output(evals, completed_runs, stagnant_runs, runtime)
+    output(evals, completed_runs, stagnant_runs, runtime)
     #print("\tRuns:", optimum_runs)
 
 if OUTPUT_FILE:
     print_best(RESULTS, OUTPUT_FILE)
 else:
-    #print_best(RESULTS)
+    print_best(RESULTS)
 
 t_runtime = timeit.default_timer() - COMP_TIME
 
-#print("\nTotal Approximate Runtime: {:.5f} sec\n".format(t_runtime))
+print("\nTotal Approximate Runtime: {:.5f} sec\n".format(t_runtime))
 
 if OUTPUT_FILE:
     OUTPUT_FILE.write("\n\nTotal Approximate Runtime: {:.5f} sec\n\n".format(t_runtime))

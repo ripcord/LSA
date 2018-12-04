@@ -1,0 +1,34 @@
+
+
+<++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++>
+                                 <- Trial #1 ->                                 
+Date: 2018-12-03
+Time: 15:45.29
+
+Fitness Evaluations: 1
+         Dimensions: 2
+             Points: 1
+            Optimum: Maximum
+
+*-->Evaluation #1:
+	Elite Point Coordinates: [1.109328141193033 -2.5596373458008386]
+	     Maximum Iterations: 1000
+	   Completed Iterations: 118
+	    Stagnant Iterations: 100
+	      Actual Iterations: 18
+
+	    Approximate Runtime: 0.14932 sec
+
+	            *** FITNESS: 0.411234193879 ***
+
+
+	 ------------------
+	 | Global Maximum |
+	 ------------------
+  Best Evaluation: 1
+Actual Iterations: 18
+Elite Coordinates: [1.109328141193033 -2.5596373458008386]
+          Fitness: 0.411234193879
+
+Total Approximate Runtime: 0.15255 sec
+
